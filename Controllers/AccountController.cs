@@ -1,8 +1,7 @@
-﻿using IdentityManager.Data;
+﻿using IdentityManager.Models;
 using IdentityManager.Models.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Runtime.CompilerServices;
 
 namespace IdentityManager.Controllers;
 
