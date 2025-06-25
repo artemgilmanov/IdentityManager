@@ -42,7 +42,17 @@ public class AccountController : Controller
         await _signInManager.SignInAsync(user, isPersistent: false);
         return RedirectToAction("Index", "Home");
       }
+
+      AddErrors(result);
     }
     return View(model);
+  }
+
+  private void AddErrors(IdentityResult result) 
+  {
+    foreach(var error in result.Errors)
+    {
+      ModelState.AddModelError(string.Empty, error.Description);
+    }
   }
 }
