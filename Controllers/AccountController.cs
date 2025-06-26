@@ -12,21 +12,24 @@ public class AccountController : Controller
 
   public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
   {
-    _userManager  = userManager;
+    _userManager = userManager;
     _signInManager = signInManager;
   }
 
-  public IActionResult Register()
+  public IActionResult Register(string returnUrl = null)
   {
+    ViewData["ReturnUrl"] = returnUrl;
     RegisterViewModel registerViewModel = new();
     return View(registerViewModel);
   }
 
   [HttpPost]
   [ValidateAntiForgeryToken]
-  public async Task<IActionResult> Register(RegisterViewModel model)
+  public async Task<IActionResult> Register(RegisterViewModel model, string returnUrl = null)
   {
-    if (ModelState.IsValid) 
+    ViewData["ReturnUrl"] = returnUrl;
+    returnUrl = returnUrl ?? Url.Content("~/");
+    if (ModelState.IsValid)
     {
       var user = new ApplicationUser
       {
@@ -39,7 +42,7 @@ public class AccountController : Controller
       if (result.Succeeded)
       {
         await _signInManager.SignInAsync(user, isPersistent: false);
-        return RedirectToAction("Index", "Home");
+        return LocalRedirect(returnUrl);
       }
 
       AddErrors(result);
@@ -55,22 +58,26 @@ public class AccountController : Controller
     return RedirectToAction("Index", "Home");
   }
 
-  public IActionResult Login()
+  public IActionResult Login(string returnUrl = null)
   {
+    ViewData["ReturnUrl"] = returnUrl;
     return View();
   }
 
   [HttpPost]
   [ValidateAntiForgeryToken]
-  public async Task<IActionResult> Login(LoginViewModel model)
+  public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
   {
+    ViewData["ReturnUrl"] = returnUrl;
+    returnUrl = returnUrl ?? Url.Content("~/");
     if (ModelState.IsValid)
     {
       var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
       if (result.Succeeded)
       {
-        return RedirectToAction("Index", "Home");
-      } else
+        return LocalRedirect(returnUrl);
+      }
+      else
       {
         ModelState.AddModelError(string.Empty, "Invalid login attempt");
         return View(model);
@@ -79,9 +86,9 @@ public class AccountController : Controller
     return View(model);
   }
 
-  private void AddErrors(IdentityResult result) 
+  private void AddErrors(IdentityResult result)
   {
-    foreach(var error in result.Errors)
+    foreach (var error in result.Errors)
     {
       ModelState.AddModelError(string.Empty, error.Description);
     }
